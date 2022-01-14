@@ -16,13 +16,19 @@ use Phinx\Db\Table\Index;
 class Table extends \Phinx\Db\Table
 {
     /**
+     * @var array
+     */
+    protected array $options = [];
+
+    /**
      * 设置id
      * @param $id
      * @return $this
      */
-    public function setId($id)
+    public function setId($id): Table
     {
         $this->options['id'] = $id;
+
         return $this;
     }
 
@@ -31,9 +37,10 @@ class Table extends \Phinx\Db\Table
      * @param $key
      * @return $this
      */
-    public function setPrimaryKey($key)
+    public function setPrimaryKey($key): Table
     {
         $this->options['primary_key'] = $key;
+
         return $this;
     }
 
@@ -42,9 +49,10 @@ class Table extends \Phinx\Db\Table
      * @param $engine
      * @return $this
      */
-    public function setEngine($engine)
+    public function setEngine($engine): Table
     {
         $this->options['engine'] = $engine;
+
         return $this;
     }
 
@@ -53,9 +61,10 @@ class Table extends \Phinx\Db\Table
      * @param $comment
      * @return $this
      */
-    public function setComment($comment)
+    public function setComment($comment): Table
     {
         $this->options['comment'] = $comment;
+
         return $this;
     }
 
@@ -64,31 +73,39 @@ class Table extends \Phinx\Db\Table
      * @param $collation
      * @return $this
      */
-    public function setCollation($collation)
+    public function setCollation($collation): Table
     {
         $this->options['collation'] = $collation;
+
         return $this;
     }
 
-    public function addSoftDelete()
+    public function addSoftDelete(): Table
     {
         $this->addColumn(Column::timestamp('delete_time')->setNullable());
+
         return $this;
     }
 
-    public function addMorphs($name, $indexName = null)
+    public function addMorphs($name, $indexName = null): Table
     {
         $this->addColumn(Column::unsignedInteger("{$name}_id"));
+
         $this->addColumn(Column::string("{$name}_type"));
+
         $this->addIndex(["{$name}_id", "{$name}_type"], ['name' => $indexName]);
+
         return $this;
     }
 
-    public function addNullableMorphs($name, $indexName = null)
+    public function addNullableMorphs($name, $indexName = null): Table
     {
         $this->addColumn(Column::unsignedInteger("{$name}_id")->setNullable());
+
         $this->addColumn(Column::string("{$name}_type")->setNullable());
+
         $this->addIndex(["{$name}_id", "{$name}_type"], ['name' => $indexName]);
+
         return $this;
     }
 
@@ -97,7 +114,7 @@ class Table extends \Phinx\Db\Table
      * @param string $updatedAtColumnName
      * @return \Phinx\Db\Table|Table
      */
-    public function addTimestamps($createdAtColumnName = 'create_time', $updatedAtColumnName = 'update_time')
+    public function addTimestamps(string $createdAtColumnName = 'create_time', string $updatedAtColumnName = 'update_time')
     {
         return parent::addTimestamps($createdAtColumnName, $updatedAtColumnName);
     }
@@ -116,6 +133,7 @@ class Table extends \Phinx\Db\Table
             $index->setType(Index::UNIQUE);
             $this->addIndex($index);
         }
+
         return parent::addColumn($columnName, $type, $options);
     }
 
@@ -125,7 +143,7 @@ class Table extends \Phinx\Db\Table
      * @param array  $options
      * @return \Phinx\Db\Table|Table
      */
-    public function changeColumn($columnName, $newColumnType = null, $options = [])
+    public function changeColumn($columnName, $newColumnType = null, array $options = [])
     {
         if ($columnName instanceof \Phinx\Db\Table\Column) {
             return parent::changeColumn($columnName->getName(), $columnName, $options);
