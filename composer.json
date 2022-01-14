@@ -1,0 +1,35 @@
+{
+    "name": "catchadmin/think-migration",
+    "authors": [
+        {
+            "name": "JaguarJack",
+            "email": "njphper@gmail.com"
+        }
+    ],
+    "license": "MIT",
+    "autoload": {
+        "psr-4": {
+            "catchAdmin\\migration\\": "src"
+        }
+    },
+    "extra": {
+        "think": {
+            "services": [
+                "catchAdmin\\migration\\MigrationService"
+            ]
+        }
+    },
+    "require": {
+        "php": ">=7.4",
+        "topthink/framework": "^6.0.0",
+        "topthink/think-helper": "^3.0.3",
+        "robmorgan/phinx": "^0.12.9"
+    },
+    "minimum-stability": "dev",
+    "suggest": {
+        "fzaninotto/faker": "Required to use the factory builder (^1.8)."
+    },
+    "require-dev": {
+        "fzaninotto/faker": "^1.9"
+    }
+}
