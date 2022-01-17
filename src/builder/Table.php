@@ -9,10 +9,9 @@
 // | Author: JaguarJack <njpgper@gmail.com@qq.com>
 // +----------------------------------------------------------------------
 
-namespace catchAdmin\migration\db;
+namespace catchAdmin\migration\builder;
 
 use catchAdmin\migration\exceptions\ColumnCreateFailedException;
-use Exception;
 use Phinx\Db\Table\Index;
 use Phinx\Db\Table as PhinxTable;
 
@@ -51,6 +50,8 @@ use Phinx\Db\Table as PhinxTable;
  * @method Column set(string $name)
  * @method Column macAddress(string $name)
  * @method Column ipAddress($name, int $length = 50)
+ * @method Column year($name)
+ * @method Column double($name, int $precision = 8, int $scale = 2)
  */
 class Table extends PhinxTable
 {
@@ -284,5 +285,50 @@ class Table extends PhinxTable
         $this->index(["{$name}_id", "{$name}_type"], ['name' => $indexName]);
 
         return $this;
+    }
+
+    /**
+     * building columns
+     *
+     * @time 2022年01月17日
+     * @return array
+     */
+    public function getBuildingColumns(): array
+    {
+        return $this->columns;
+    }
+
+    /**
+     * create table
+     *
+     * @time 2022年01月17日
+     */
+    public function create(): bool
+    {
+        /* @var Column $column */
+        foreach ($this->columns as $column) {
+            $this->addColumn($column);
+        }
+
+        parent::create();
+
+        return true;
+    }
+
+    /**
+     * update table
+     *
+     * @time 2022年01月17日
+     */
+    public function save(): bool
+    {
+        /* @var Column $column */
+        foreach ($this->columns as $column) {
+            $this->addColumn($column);
+        }
+
+        parent::save();
+
+        return true;
     }
 }

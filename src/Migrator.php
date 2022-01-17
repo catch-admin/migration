@@ -12,7 +12,7 @@
 namespace catchAdmin\migration;
 
 use Phinx\Migration\AbstractMigration;
-use catchAdmin\migration\db\Table;
+use catchAdmin\migration\builder\Table;
 
 class Migrator extends AbstractMigration
 {

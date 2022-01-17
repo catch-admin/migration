@@ -9,7 +9,7 @@
 // | Author: JaguarJack <njpgper@gmail.com@qq.com>
 // +----------------------------------------------------------------------
 
-namespace catchAdmin\migration\db;
+namespace catchAdmin\migration\builder;
 
 use catchAdmin\migration\exceptions\TableNotExistException;
 

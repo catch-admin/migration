@@ -26,6 +26,11 @@ use think\Service;
 class MigrationService extends Service
 {
 
+    /**
+     * @desc boot
+     *
+     * @time 2022年01月17日
+     */
     public function boot()
     {
         $this->app->bind(FakerGenerator::class, function () {

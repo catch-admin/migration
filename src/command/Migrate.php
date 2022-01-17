@@ -24,14 +24,27 @@ abstract class Migrate extends Command
     /**
      * @var array
      */
-    protected $migrations;
+    protected array $migrations;
 
-    protected function getPath()
+    /**
+     * @time 2022年01月17日
+     * @return string
+     */
+    protected function getPath(): string
     {
+        if ($this->input->hasOption('path')) {
+            return $this->app->getRootPath() . $this->input->getOption('path');
+        }
+
         return $this->app->getRootPath() . 'database' . DIRECTORY_SEPARATOR . 'migrations';
     }
 
-    protected function executeMigration(MigrationInterface $migration, $direction = MigrationInterface::UP)
+    /**
+     * @time 2022年01月17日
+     * @param MigrationInterface $migration
+     * @param string $direction
+     */
+    protected function executeMigration(MigrationInterface $migration, string $direction = MigrationInterface::UP)
     {
         $this->output->writeln('');
         $this->output->writeln(' ==' . ' <info>' . $migration->getVersion() . ' ' . $migration->getName() . ':</info>' . ' <comment>' . (MigrationInterface::UP === $direction ? 'migrating' : 'reverting') . '</comment>');
@@ -82,17 +95,29 @@ abstract class Migrate extends Command
         $this->output->writeln(' ==' . ' <info>' . $migration->getVersion() . ' ' . $migration->getName() . ':</info>' . ' <comment>' . (MigrationInterface::UP === $direction ? 'migrated' : 'reverted') . ' ' . sprintf('%.4fs', $end - $start) . '</comment>');
     }
 
-    protected function getVersionLog()
+    /**
+     * @time 2022年01月17日
+     * @return array
+     */
+    protected function getVersionLog(): array
     {
         return $this->getAdapter()->getVersionLog();
     }
 
-    protected function getVersions()
+    /**
+     * @time 2022年01月17日
+     * @return array
+     */
+    protected function getVersions(): array
     {
         return $this->getAdapter()->getVersions();
     }
 
-    protected function getMigrations()
+    /**
+     * @time 2022年01月17日
+     * @return array|Migrator[]
+     */
+    protected function getMigrations(): array
     {
         if (null === $this->migrations) {
             $phpFiles = glob($this->getPath() . DIRECTORY_SEPARATOR . '*.php', defined('GLOB_BRACE') ? GLOB_BRACE : 0);

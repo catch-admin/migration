@@ -19,14 +19,19 @@ use think\App;
 class Creator
 {
 
-    protected $app;
+    protected App $app;
 
     public function __construct(App $app)
     {
         $this->app = $app;
     }
 
-    public function create(string $className)
+    /**
+     * @time 2022年01月17日
+     * @param string $className
+     * @return string
+     */
+    public function create(string $className): string
     {
         $path = $this->ensureDirectory();
 
@@ -61,7 +66,11 @@ class Creator
         return $filePath;
     }
 
-    protected function ensureDirectory()
+    /**
+     * @time 2022年01月17日
+     * @return string
+     */
+    protected function ensureDirectory(): string
     {
         $path = $this->app->getRootPath() . 'database' . DIRECTORY_SEPARATOR . 'migrations';
 
@@ -76,7 +85,11 @@ class Creator
         return $path;
     }
 
-    protected function getTemplate()
+    /**
+     * @time 2022年01月17日
+     * @return string
+     */
+    protected function getTemplate(): string
     {
         return __DIR__ . '/command/stubs/migrate.stub';
     }

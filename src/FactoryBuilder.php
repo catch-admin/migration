@@ -24,70 +24,70 @@ class FactoryBuilder
      *
      * @var array
      */
-    protected $definitions;
+    protected array $definitions;
 
     /**
      * The model being built.
      *
      * @var string
      */
-    protected $class;
+    protected string $class;
 
     /**
      * The name of the model being built.
      *
      * @var string
      */
-    protected $name = 'default';
+    protected string $name = 'default';
 
     /**
      * The database connection on which the model instance should be persisted.
      *
      * @var string
      */
-    protected $connection;
+    protected string $connection;
 
     /**
      * The model states.
      *
      * @var array
      */
-    protected $states;
+    protected array $states;
 
     /**
      * The model after making callbacks.
      *
      * @var array
      */
-    protected $afterMaking = [];
+    protected array $afterMaking = [];
 
     /**
      * The model after creating callbacks.
      *
      * @var array
      */
-    protected $afterCreating = [];
+    protected array $afterCreating = [];
 
     /**
      * The states to apply.
      *
      * @var array
      */
-    protected $activeStates = [];
+    protected array $activeStates = [];
 
     /**
      * The Faker instance for the builder.
      *
      * @var Faker
      */
-    protected $faker;
+    protected Faker $faker;
 
     /**
      * The number of models to build.
      *
      * @var int|null
      */
-    protected $amount = null;
+    protected ?int $amount = null;
 
     /**
      * Create an new builder instance.
@@ -109,8 +109,7 @@ class FactoryBuilder
         array $afterMaking,
         array $afterCreating,
         Faker $faker
-    )
-    {
+    ) {
         $this->name          = $name;
         $this->class         = $class;
         $this->faker         = $faker;
@@ -126,7 +125,7 @@ class FactoryBuilder
      * @param int $amount
      * @return $this
      */
-    public function times($amount)
+    public function times(int $amount): FactoryBuilder
     {
         $this->amount = $amount;
 
@@ -139,7 +138,7 @@ class FactoryBuilder
      * @param string $state
      * @return $this
      */
-    public function state($state)
+    public function state(string $state): FactoryBuilder
     {
         return $this->states([$state]);
     }
@@ -150,7 +149,7 @@ class FactoryBuilder
      * @param array|mixed $states
      * @return $this
      */
-    public function states($states)
+    public function states($states): FactoryBuilder
     {
         $this->activeStates = is_array($states) ? $states : func_get_args();
 
@@ -163,7 +162,7 @@ class FactoryBuilder
      * @param string $name
      * @return $this
      */
-    public function connection($name)
+    public function connection(string $name): FactoryBuilder
     {
         $this->connection = $name;
 
@@ -176,7 +175,7 @@ class FactoryBuilder
      * @param array $attributes
      * @return \Closure
      */
-    public function lazy(array $attributes = [])
+    public function lazy(array $attributes = []): \Closure
     {
         return function () use ($attributes) {
             return $this->create($attributes);
@@ -212,7 +211,7 @@ class FactoryBuilder
      * @param Collection $results
      * @return void
      */
-    protected function store($results)
+    protected function store(Collection $results)
     {
         $results->each(function (Model $model) {
             $model->save();
@@ -298,7 +297,7 @@ class FactoryBuilder
      * @param array $attributes
      * @return Model
      */
-    protected function makeInstance(array $attributes = [])
+    protected function makeInstance(array $attributes = []): Model
     {
         /** @var Model $model */
         $model = new $this->class;
@@ -315,7 +314,7 @@ class FactoryBuilder
      * @param array $attributes
      * @return array
      */
-    protected function applyStates(array $definition, array $attributes = [])
+    protected function applyStates(array $definition, array $attributes = []): array
     {
         foreach ($this->activeStates as $state) {
             if (!isset($this->states[$this->class][$state])) {
@@ -342,7 +341,7 @@ class FactoryBuilder
      * @param array $attributes
      * @return array
      */
-    protected function stateAttributes($state, array $attributes)
+    protected function stateAttributes(string $state, array $attributes): array
     {
         $stateAttributes = $this->states[$this->class][$state];
 
@@ -363,7 +362,7 @@ class FactoryBuilder
      * @param array $attributes
      * @return array
      */
-    protected function expandAttributes(array $attributes)
+    protected function expandAttributes(array $attributes): array
     {
         foreach ($attributes as &$attribute) {
             if (is_callable($attribute) && !is_string($attribute) && !is_array($attribute)) {
@@ -388,7 +387,7 @@ class FactoryBuilder
      * @param Collection $models
      * @return void
      */
-    public function callAfterMaking($models)
+    public function callAfterMaking(Collection $models)
     {
         $this->callAfter($this->afterMaking, $models);
     }
@@ -399,7 +398,7 @@ class FactoryBuilder
      * @param Collection $models
      * @return void
      */
-    public function callAfterCreating($models)
+    public function callAfterCreating(Collection $models)
     {
         $this->callAfter($this->afterCreating, $models);
     }
@@ -411,7 +410,7 @@ class FactoryBuilder
      * @param Collection $models
      * @return void
      */
-    protected function callAfter(array $afterCallbacks, $models)
+    protected function callAfter(array $afterCallbacks, Collection $models)
     {
         $states = array_merge([$this->name], $this->activeStates);
 
@@ -430,7 +429,7 @@ class FactoryBuilder
      * @param string $state
      * @return void
      */
-    protected function callAfterCallbacks(array $afterCallbacks, $model, $state)
+    protected function callAfterCallbacks(array $afterCallbacks, Model $model, string $state)
     {
         if (!isset($afterCallbacks[$this->class][$state])) {
             return;
@@ -447,7 +446,7 @@ class FactoryBuilder
      * @param string $state
      * @return bool
      */
-    protected function stateHasAfterCallback($state)
+    protected function stateHasAfterCallback(string $state): bool
     {
         return isset($this->afterMaking[$this->class][$state]) ||
             isset($this->afterCreating[$this->class][$state]);

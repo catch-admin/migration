@@ -11,11 +11,12 @@
 namespace catchAdmin\migration;
 
 use Phinx\Seed\AbstractSeed;
+use think\App;
 
 class Seeder extends AbstractSeed
 {
     /**
-     * @return Factory
+     * @return App|object
      */
     public function factory(): Factory
     {

@@ -13,17 +13,21 @@ namespace catchAdmin\migration;
 
 use InvalidArgumentException;
 use Phinx\Db\Adapter\AdapterFactory;
+use Phinx\Db\Adapter\AdapterInterface;
 
 abstract class Command extends \think\console\Command
 {
-
-    public function getAdapter()
+    /**
+     * @time 2022年01月17日
+     * @return AdapterInterface
+     */
+    public function getAdapter(): AdapterInterface
     {
         if (isset($this->adapter)) {
             return $this->adapter;
         }
 
-        $options = $this->getDbConfig();
+        $options = $this->getAdapterConfig();
 
         $adapter = AdapterFactory::instance()->getAdapter($options['adapter'], $options);
 
@@ -37,53 +41,80 @@ abstract class Command extends \think\console\Command
     }
 
     /**
-     * 获取数据库配置
      * @return array
      */
-    protected function getDbConfig(): array
+    protected function getAdapterConfig(): array
     {
-        $default = $this->app->config->get('database.default');
+        $adapterKeys = [
+            'adapter' => 'type',
+            'host' => 'hostname',
+            'name' => 'database',
+            'user' => 'username',
+            'pass' => 'password',
+            'port' => 'hostport',
+            'charset' => 'charset',
+            'table_prefix' => 'prefix'
+        ];
 
-        $config = $this->app->config->get("database.connections.{$default}");
+        $defaultConfig = $this->getDefaultDatabase();
 
-        if (0 == $config['deploy']) {
-            $dbConfig = [
-                'adapter'      => $config['type'],
-                'host'         => $config['hostname'],
-                'name'         => $config['database'],
-                'user'         => $config['username'],
-                'pass'         => $config['password'],
-                'port'         => $config['hostport'],
-                'charset'      => $config['charset'],
-                'table_prefix' => $config['prefix'],
-            ];
-        } else {
-            $dbConfig = [
-                'adapter'      => explode(',', $config['type'])[0],
-                'host'         => explode(',', $config['hostname'])[0],
-                'name'         => explode(',', $config['database'])[0],
-                'user'         => explode(',', $config['username'])[0],
-                'pass'         => explode(',', $config['password'])[0],
-                'port'         => explode(',', $config['hostport'])[0],
-                'charset'      => explode(',', $config['charset'])[0],
-                'table_prefix' => explode(',', $config['prefix'])[0],
-            ];
+        $isDeploy = $this->isDeploy();
+
+        $adapterConfig = [];
+
+        foreach ($adapterKeys as $key => $defaultConfigKey) {
+            if ($isDeploy) {
+                $adapterConfig[$key] = is_array($defaultConfig[$defaultConfigKey]) ? $defaultConfig[$defaultConfigKey][0] :
+                    explode(',', $defaultConfig[$defaultConfigKey])[0];
+            } else {
+                $adapterConfig[$key] = $defaultConfig[$defaultConfigKey];
+            }
         }
 
         $table = $this->app->config->get('database.migration_table', 'migrations');
 
-        $dbConfig['default_migration_table'] = $dbConfig['table_prefix'] . $table;
+        $adapterConfig['default_migration_table'] = $adapterConfig['table_prefix'] . $table;
 
-        return $dbConfig;
+        return $adapterConfig;
     }
 
+    /**
+     * 是否分布式部署
+     *
+     * @time 2022年01月17日
+     * @return bool
+     */
+    protected function isDeploy(): bool
+    {
+        $config = $this->getDefaultDatabase();
+
+        return isset($config['deploy']) && $config['deploy'] == 1;
+    }
+
+
+    /**
+     * get database config
+     * @time 2022年01月17日
+     * @return array|mixed
+     */
+    protected function getDefaultDatabase(): array
+    {
+        $default = $this->app->config->get('database.default');
+
+        return $this->app->config->get("database.connections.{$default}");
+    }
+
+    /**
+     * @time 2022年01月17日
+     * @param string $path
+     */
     protected function verifyMigrationDirectory(string $path)
     {
-        if (!is_dir($path)) {
+        if (! is_dir($path)) {
             throw new InvalidArgumentException(sprintf('Migration directory "%s" does not exist', $path));
         }
 
-        if (!is_writable($path)) {
+        if (! is_writable($path)) {
             throw new InvalidArgumentException(sprintf('Migration directory "%s" is not writable', $path));
         }
     }
