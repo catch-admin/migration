@@ -423,9 +423,7 @@ class Column extends \Phinx\Db\Table\Column
      */
     public function softDelete(string $deletedAt = 'delete_at', int $default = 0): Column
     {
-        $this->unsignedInteger($deletedAt)->nullable()->default($default)->comment('软删除');
-
-        return $this;
+        return $this->unsignedInteger($deletedAt)->nullable()->default($default)->comment('软删除');
     }
 
     /**
@@ -438,13 +436,12 @@ class Column extends \Phinx\Db\Table\Column
     public function createdAt(string $createdAt = 'created_at', int $default = 0, bool $withTimestamp = false): Column
     {
         if (! $withTimestamp) {
-            $this->unsignedInteger($createdAt)->nullable()->default($default)->comment('创建时间');
+            return $this->unsignedInteger($createdAt)->nullable()->default($default)->comment('创建时间');
         } else {
-            $this->timestamp($createdAt)->setOptions([
+            return $this->timestamp($createdAt)->setOptions([
                 'default' => $default ? : 'CURRENT_TIMESTAMP',
             ]);
         }
-        return $this;
     }
 
     /**
@@ -457,32 +454,14 @@ class Column extends \Phinx\Db\Table\Column
     public function updatedAt(string $updatedAt = 'updated_at', int $default = 0, bool $withTimestamp = false): Column
     {
         if (! $withTimestamp) {
-            $this->unsignedInteger($updatedAt)->nullable()->default($default)->comment('更新时间');
+            return $this->unsignedInteger($updatedAt)->nullable()->default($default)->comment('更新时间');
         } else {
-            $this->timestamp($updatedAt)->setOptions([
+            return $this->timestamp($updatedAt)->setOptions([
                 'null' => true,
                 'default' => $default ? : 'CURRENT_TIMESTAMP',
                 'update' => $default ? : 'CURRENT_TIMESTAMP',
             ]);
         }
-
-        return $this;
-    }
-
-    /**
-     * created_at & updated_at
-     *
-     * @time 2022年01月17日
-     * @param string $createdAt
-     * @param string $updatedAt
-     * @param int $default
-     * @param bool $withTimestamp
-     */
-    public function timestamps(string $createdAt = 'created_at', string $updatedAt = 'updated_at', int $default = 0, bool $withTimestamp = false)
-    {
-        $this->createdAt($createdAt, $default, $withTimestamp);
-
-        $this->updatedAt($updatedAt, $default, $withTimestamp);
     }
 
     /**

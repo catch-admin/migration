@@ -29,11 +29,12 @@ class Creator
     /**
      * @time 2022年01月17日
      * @param string $className
+     * @param string $path
      * @return string
      */
-    public function create(string $className): string
+    public function create(string $className, string $path = ''): string
     {
-        $path = $this->ensureDirectory();
+        $path = $this->ensureDirectory($path);
 
         if (! Util::isValidPhinxClassName($className)) {
             throw new InvalidArgumentException(sprintf('The migration class name "%s" is invalid. Please use CamelCase format.', $className));
@@ -68,11 +69,12 @@ class Creator
 
     /**
      * @time 2022年01月17日
+     * @param string $path
      * @return string
      */
-    protected function ensureDirectory(): string
+    protected function ensureDirectory(string $path): string
     {
-        $path = $this->app->getRootPath() . 'database' . DIRECTORY_SEPARATOR . 'migrations';
+        $path = $this->app->getRootPath() . ($path ? : 'database' . DIRECTORY_SEPARATOR . 'migrations');
 
         if (!is_dir($path) && !mkdir($path, 0755, true)) {
             throw new InvalidArgumentException(sprintf('directory "%s" does not exist', $path));

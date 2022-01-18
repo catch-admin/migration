@@ -11,12 +11,13 @@
 
 namespace catchAdmin\migration\builder;
 
+use catchAdmin\migration\builder\Column;
 use catchAdmin\migration\exceptions\ColumnCreateFailedException;
 use Phinx\Db\Table\Index;
 use Phinx\Db\Table as PhinxTable;
 
 /**
- * @method Column string(string $name)
+ * @method Column string(string $name, int $length = 255)
  * @method Column integer(string $name)
  * @method Column mediumInteger(string $name)
  * @method Column bigInteger(string $name)
@@ -43,11 +44,10 @@ use Phinx\Db\Table as PhinxTable;
  * @method Column char(string $name)
  * @method Column boolean(string $name)
  * @method Column binary(string $name)
- * @method Column softDelete(string $name)
+ * @method Column softDelete(string $deletedAt = 'delete_at', int $default = 0)
  * @method Column createdAt(string $createdAt = 'created_at', int $default = 0, bool $withTimestamp = false)
  * @method Column updatedAt(string $updatedAt = 'updated_at', int $default = 0, bool $withTimestamp = false)
- * @method Column timestamps(string $createdAt = 'created_at', string $updatedAt = 'updated_at', int $default = 0, bool $withTimestamp = false)
- * @method Column set(string $name)
+ * @method Column set(string $name, array $values)
  * @method Column macAddress(string $name)
  * @method Column ipAddress($name, int $length = 50)
  * @method Column year($name)
@@ -55,11 +55,6 @@ use Phinx\Db\Table as PhinxTable;
  */
 class Table extends PhinxTable
 {
-    /**
-     * @var array
-     */
-    protected $columns = [];
-
     /**
      * @var array
      */
@@ -169,24 +164,26 @@ class Table extends PhinxTable
     {
         $columnName = $arguments[0];
 
+        $column = new Column();
+
         switch (count($arguments)) {
             case 1:
-                $column = Column::{$columnType}($columnName);
+                $column = $column->{$columnType}($columnName);
                 break;
             case 2:
-                $column = Column::{$columnType}($columnName, $arguments[1]);
+                $column = $column->{$columnType}($columnName, $arguments[1]);
                 break;
             case 3:
-                $column = Column::{$columnType}($columnName, $arguments[1], $arguments[2]);
+                $column = $column->{$columnType}($columnName, $arguments[1], $arguments[2]);
                 break;
             case 4:
-                $column = Column::{$columnType}($columnName, $arguments[1], $arguments[2], $arguments[3]);
+                $column = $column->{$columnType}($columnName, $arguments[1], $arguments[2], $arguments[3]);
                 break;
             default:
                 throw new ColumnCreateFailedException("Column {$columnName} create failed, arguments not support");
         }
 
-        $this->columns[] = $column;
+        $this->addColumn($column);
 
         return $column;
     }
@@ -288,6 +285,25 @@ class Table extends PhinxTable
     }
 
     /**
+     * created_at & updated_at
+     *
+     * @time 2022年01月17日
+     * @param string $createdAt
+     * @param string $updatedAt
+     * @param int $default
+     * @param bool $withTimestamp
+     * @return Table
+     */
+    public function timestamps(string $createdAt = 'created_at', string $updatedAt = 'updated_at', int $default = 0, bool $withTimestamp = false): Table
+    {
+        $this->addColumn((new Column())->createdAt($createdAt, $default, $withTimestamp));
+
+        $this->addColumn((new Column())->updatedAt($updatedAt, $default, $withTimestamp));
+
+        return $this;
+    }
+
+    /**
      * building columns
      *
      * @time 2022年01月17日
@@ -296,39 +312,5 @@ class Table extends PhinxTable
     public function getBuildingColumns(): array
     {
         return $this->columns;
-    }
-
-    /**
-     * create table
-     *
-     * @time 2022年01月17日
-     */
-    public function create(): bool
-    {
-        /* @var Column $column */
-        foreach ($this->columns as $column) {
-            $this->addColumn($column);
-        }
-
-        parent::create();
-
-        return true;
-    }
-
-    /**
-     * update table
-     *
-     * @time 2022年01月17日
-     */
-    public function save(): bool
-    {
-        /* @var Column $column */
-        foreach ($this->columns as $column) {
-            $this->addColumn($column);
-        }
-
-        parent::save();
-
-        return true;
     }
 }

@@ -44,8 +44,9 @@ EOT
     /**
      * Migrate the database.
      *
-     * @param Input  $input
+     * @param Input $input
      * @param Output $output
+     * @throws \Exception
      */
     protected function execute(Input $input, Output $output)
     {

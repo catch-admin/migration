@@ -16,6 +16,7 @@ use RuntimeException;
 use think\console\Command;
 use think\console\Input;
 use think\console\input\Argument as InputArgument;
+use think\console\input\Option as InputOption;
 use think\console\Output;
 use catchAdmin\migration\Creator;
 
@@ -30,6 +31,7 @@ class Create extends Command
         $this->setName('migrate:create')
             ->setDescription('Create a new migration')
             ->addArgument('name', InputArgument::REQUIRED, 'What is the name of the migration?')
+            ->addOption('--path', '-p', InputOption::VALUE_REQUIRED, 'create in the path which set')
             ->setHelp(sprintf('%sCreates a new database migration%s', PHP_EOL, PHP_EOL));
     }
 
@@ -49,7 +51,7 @@ class Create extends Command
 
         $className = $input->getArgument('name');
 
-        $path = $creator->create($className);
+        $path = $creator->create($className, $this->input->getOption('path'));
 
         $output->writeln('<info>created</info> .' . str_replace(getcwd(), '', realpath($path)));
     }

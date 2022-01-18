@@ -12,6 +12,7 @@
 namespace catchAdmin\migration;
 
 use InvalidArgumentException;
+use Phinx\Config\Config;
 use Phinx\Db\Adapter\AdapterFactory;
 use Phinx\Db\Adapter\AdapterInterface;
 
@@ -74,6 +75,9 @@ abstract class Command extends \think\console\Command
         $table = $this->app->config->get('database.migration_table', 'migrations');
 
         $adapterConfig['default_migration_table'] = $adapterConfig['table_prefix'] . $table;
+
+        // 默认使用版本排序
+        $adapterConfig['version_order'] = Config::VERSION_ORDER_CREATION_TIME;
 
         return $adapterConfig;
     }

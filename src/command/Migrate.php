@@ -11,6 +11,8 @@
 
 namespace catchAdmin\migration\command;
 
+use catchAdmin\migration\console\Input;
+use catchAdmin\migration\console\Output;
 use Phinx\Db\Adapter\AdapterFactory;
 use Phinx\Db\Adapter\ProxyAdapter;
 use Phinx\Migration\AbstractMigration;
@@ -24,7 +26,7 @@ abstract class Migrate extends Command
     /**
      * @var array
      */
-    protected array $migrations;
+    protected array $migrations = [];
 
     /**
      * @time 2022年01月17日
@@ -119,7 +121,7 @@ abstract class Migrate extends Command
      */
     protected function getMigrations(): array
     {
-        if (null === $this->migrations) {
+        if (empty($this->migrations)) {
             $phpFiles = glob($this->getPath() . DIRECTORY_SEPARATOR . '*.php', defined('GLOB_BRACE') ? GLOB_BRACE : 0);
 
             // filter the files to only get the ones that match our naming scheme
@@ -152,7 +154,7 @@ abstract class Migrate extends Command
                     }
 
                     // instantiate it
-                    $migration = new $class($version, $this->input, $this->output);
+                    $migration = new $class($version, new Input($this->input), new Output($this->output));
 
                     if (!($migration instanceof AbstractMigration)) {
                         throw new \InvalidArgumentException(sprintf('The class "%s" in file "%s" must extend \Phinx\Migration\AbstractMigration', $class, $filePath));
