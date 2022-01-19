@@ -16,6 +16,7 @@ use Phinx\Util\Util;
 use RuntimeException;
 use think\console\Command;
 use think\console\input\Argument as InputArgument;
+use think\console\input\Option as InputOption;
 
 class Create extends Command
 {
@@ -23,7 +24,9 @@ class Create extends Command
     {
         $this->setName('factory:create')
             ->setDescription('Create a new model factory')
-            ->addArgument('name', InputArgument::REQUIRED, 'What is the name of the model?');
+            ->addArgument('name', InputArgument::REQUIRED, 'What is the name of the model?')
+            ->addOption('--path', '-p', InputOption::VALUE_REQUIRED, 'create factory in the path which set');
+
     }
 
     public function handle()
@@ -77,6 +80,10 @@ class Create extends Command
 
     protected function getPath()
     {
+        if ($this->input->hasOption('path')) {
+            return $this->app->getRootPath() . $this->input->getOption('path');
+        }
+
         return $this->app->getRootPath() . 'database' . DIRECTORY_SEPARATOR . 'factories';
     }
 }
