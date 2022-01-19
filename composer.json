@@ -23,7 +23,7 @@
         "php": ">=7.4",
         "topthink/framework": "^6.0.0",
         "topthink/think-helper": "^3.0.3",
-        "robmorgan/phinx": "0.9.2"
+        "catchadmin/phinx": "1.0.0"
     },
     "minimum-stability": "dev",
     "suggest": {
