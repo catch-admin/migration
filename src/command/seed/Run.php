@@ -50,7 +50,7 @@ EOT
      */
     protected function execute(Input $input, Output $output)
     {
-        $seed = $input->getOption('seed');
+        $seed = ucfirst($input->getOption('seed'));
 
         // run the seed(ers)
         $start = microtime(true);

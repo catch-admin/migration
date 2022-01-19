@@ -11,6 +11,8 @@
 
 namespace catchAdmin\migration\command;
 
+use catchAdmin\migration\console\Input;
+use catchAdmin\migration\console\Output;
 use InvalidArgumentException;
 use Phinx\Seed\AbstractSeed;
 use Phinx\Util\Util;
@@ -35,7 +37,7 @@ abstract class Seed extends Command
             return $this->app->getRootPath() . $this->input->getOption('path');
         }
 
-        return $this->app->getRootPath() . 'database' . DIRECTORY_SEPARATOR . 'migrations';
+        return $this->app->getRootPath() . 'database' . DIRECTORY_SEPARATOR . 'seeds';
     }
 
     public function getSeeds(): array
@@ -62,7 +64,7 @@ abstract class Seed extends Command
                     }
 
                     // instantiate it
-                    $seed = new $class($this->input, $this->output);
+                    $seed = new $class(new Input($this->input), new Output($this->output));
 
                     if (!($seed instanceof AbstractSeed)) {
                         throw new InvalidArgumentException(sprintf('The class "%s" in file "%s" must extend \Phinx\Seed\AbstractSeed', $class, $filePath));
