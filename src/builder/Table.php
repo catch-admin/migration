@@ -11,7 +11,6 @@
 
 namespace catchAdmin\migration\builder;
 
-use catchAdmin\migration\builder\Column;
 use catchAdmin\migration\exceptions\ColumnCreateFailedException;
 use Phinx\Db\Table\Index;
 use Phinx\Db\Table as PhinxTable;

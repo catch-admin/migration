@@ -23,16 +23,24 @@ abstract class Seed extends Command
     /**
      * @var array
      */
-    protected $seeds;
+    protected $seeds = [];
 
+    /**
+     * @time 2022年01月17日
+     * @return string
+     */
     protected function getPath(): string
     {
-        return $this->app->getRootPath() . 'database' . DIRECTORY_SEPARATOR . 'seeds';
+        if ($this->input->hasOption('path')) {
+            return $this->app->getRootPath() . $this->input->getOption('path');
+        }
+
+        return $this->app->getRootPath() . 'database' . DIRECTORY_SEPARATOR . 'migrations';
     }
 
     public function getSeeds(): array
     {
-        if (null === $this->seeds) {
+        if (empty($this->seeds)) {
             $phpFiles = glob($this->getPath() . DIRECTORY_SEPARATOR . '*.php', defined('GLOB_BRACE') ? GLOB_BRACE : 0);
 
             // filter the files to only get the ones that match our naming scheme

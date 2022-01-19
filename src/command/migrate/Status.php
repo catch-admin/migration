@@ -26,12 +26,15 @@ class Status extends Migrate
         $this->setName('migrate:status')
              ->setDescription('Show migration status')
              ->addOption('--format', '-f', InputOption::VALUE_REQUIRED, 'The output format: text or json. Defaults to text.')
+             ->addOption('--path', '-p', InputOption::VALUE_REQUIRED, 'migrate status in the path which set')
              ->setHelp(
                  <<<EOT
 The <info>migrate:status</info> command prints a list of all migrations, along with their current status
 
 <info>php think migrate:status</info>
 <info>php think migrate:status -f json</info>
+<info>php think seed:run -p /path</info>
+
 EOT
              );
     }

@@ -27,9 +27,10 @@ class Rollback extends Migrate
         $this->setName('migrate:rollback')
              ->setDescription('Rollback the last or to a specific migration')
              ->addOption('--target', '-t', InputOption::VALUE_REQUIRED, 'The version number to rollback to')
-             ->addOption('--date', '-d', InputOption::VALUE_REQUIRED, 'The date to rollback to')
+             ->addOption('--step', '-s', InputOption::VALUE_REQUIRED, 'The step will to rollback to')
              ->addOption('--force', '-f', InputOption::VALUE_NONE, 'Force rollback to ignore breakpoints')
-             ->setHelp(
+            ->addOption('--path', '-p', InputOption::VALUE_REQUIRED, 'The path will rollback to')
+            ->setHelp(
                  <<<EOT
 The <info>migrate:rollback</info> command reverts the last migration, or optionally up to a specific version
 
@@ -37,7 +38,7 @@ The <info>migrate:rollback</info> command reverts the last migration, or optiona
 <info>php think migrate:rollback -t 20111018185412</info>
 <info>php think migrate:rollback -d 20111018</info>
 <info>php think migrate:rollback -v</info>
-
+<info>php think migrate:rollback -p /path</info>
 EOT
              );
     }
@@ -45,20 +46,21 @@ EOT
     /**
      * Rollback the migration.
      *
-     * @param Input  $input
+     * @param Input $input
      * @param Output $output
      * @return void
+     * @throws \Exception
      */
     protected function execute(Input $input, Output $output)
     {
         $version = $input->getOption('target');
-        $date    = $input->getOption('date');
-        $force   = !!$input->getOption('force');
+        $step    = $input->getOption('step');
+        $force   = (bool) $input->getOption('force');
 
         // rollback the specified environment
         $start = microtime(true);
-        if (null !== $date) {
-            $this->rollbackToDateTime(new \DateTime($date), $force);
+        if (null !== $step) {
+            $this->rollbackToStep($step, $force);
         } else {
             $this->rollback($version, $force);
         }
@@ -68,7 +70,12 @@ EOT
         $output->writeln('<comment>All Done. Took ' . sprintf('%.4fs', $end - $start) . '</comment>');
     }
 
-    protected function rollback($version = null, $force = false)
+    /**
+     * @time 2022年01月19日
+     * @param null $version
+     * @param false $force
+     */
+    protected function rollback($version = null, bool $force = false)
     {
         $migrations = $this->getMigrations();
         $versionLog = $this->getVersionLog();
@@ -78,72 +85,57 @@ EOT
         sort($versions);
 
         // Check we have at least 1 migration to revert
-        if (empty($versions) || $version == end($versions)) {
-            $this->output->writeln('<error>No migrations to rollback</error>');
+         if (empty($versions)) {
+            $this->output->error('No migrations to rollback');
+            return;
+         }
+
+         // 如果没有设置 version，则获取最后一个版本
+         if ($version === null) {
+             $version = end($versions);
+         }
+
+         // migration 中找不到版本
+        if ( ! isset($migrations[$version])) {
+            $this->output->error("Target version {$version} not found");
             return;
         }
 
-        // If no target version was supplied, revert the last migration
-        if (null === $version) {
-            // Get the migration before the last run migration
-            $prev    = count($versions) - 2;
-            $version = $prev < 0 ? 0 : $versions[$prev];
+        $migration = $migrations[$version];
+
+        if (isset($versionLog[$migration->getVersion()]) && 0 != $versionLog[$migration->getVersion()]['breakpoint'] && !$force) {
+            $this->output->error('Breakpoint reached. Further rollbacks inhibited.');
+            return;
+        }
+
+        if (in_array($migration->getVersion(), $versions)) {
+            $this->executeMigration($migration, MigrationInterface::DOWN);
         } else {
-            // Get the first migration number
-            $first = $versions[0];
-
-            // If the target version is before the first migration, revert all migrations
-            if ($version < $first) {
-                $version = 0;
-            }
-        }
-
-        // Check the target version exists
-        if (0 !== $version && !isset($migrations[$version])) {
-            $this->output->writeln("<error>Target version ($version) not found</error>");
-            return;
-        }
-
-        // Revert the migration(s)
-        krsort($migrations);
-        foreach ($migrations as $migration) {
-            if ($migration->getVersion() <= $version) {
-                break;
-            }
-
-            if (in_array($migration->getVersion(), $versions)) {
-                if (isset($versionLog[$migration->getVersion()]) && 0 != $versionLog[$migration->getVersion()]['breakpoint'] && !$force) {
-                    $this->output->writeln('<error>Breakpoint reached. Further rollbacks inhibited.</error>');
-                    break;
-                }
-                $this->executeMigration($migration, MigrationInterface::DOWN);
-            }
+            $this->output->error('Migration Version Not Found');
         }
     }
 
-    protected function rollbackToDateTime(\DateTime $dateTime, $force = false)
+    /**
+     * @time 2022年01月19日
+     * @param $step
+     * @param false $force
+     */
+    protected function rollbackToStep($step, bool $force = false)
     {
         $versions   = $this->getVersions();
-        $dateString = $dateTime->format('YmdHis');
+
         sort($versions);
 
-        $earlierVersion      = null;
-        $availableMigrations = array_filter($versions, function ($version) use ($dateString, &$earlierVersion) {
-            if ($version <= $dateString) {
-                $earlierVersion = $version;
-            }
-            return $version >= $dateString;
-        });
+        if (! count($versions)) {
+            $this->output->error('No migrations to rollback');
+        } else {
+            while ($step) {
+                $version = end($versions);
 
-        if (count($availableMigrations) > 0) {
-            if (is_null($earlierVersion)) {
-                $this->output->writeln('Rolling back all migrations');
-                $migration = 0;
-            } else {
-                $this->output->writeln('Rolling back to version ' . $earlierVersion);
-                $migration = $earlierVersion;
+                $this->rollback($version, $force);
+
+                $step--;
             }
-            $this->rollback($migration, $force);
         }
     }
 }

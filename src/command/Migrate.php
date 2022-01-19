@@ -71,12 +71,10 @@ abstract class Migrate extends Command
                 /** @var ProxyAdapter $proxyAdapter */
                 $proxyAdapter = AdapterFactory::instance()->getWrapper('proxy', $this->getAdapter());
                 $migration->setAdapter($proxyAdapter);
-                /** @noinspection PhpUndefinedMethodInspection */
                 $migration->change();
                 $proxyAdapter->executeInvertedCommands();
                 $migration->setAdapter($this->getAdapter());
             } else {
-                /** @noinspection PhpUndefinedMethodInspection */
                 $migration->change();
             }
         } else {
@@ -147,16 +145,15 @@ abstract class Migrate extends Command
                     $fileNames[$class] = basename($filePath);
 
                     // load the migration file
-                    /** @noinspection PhpIncludeInspection */
                     require_once $filePath;
-                    if (!class_exists($class)) {
+                    if (! class_exists($class)) {
                         throw new \InvalidArgumentException(sprintf('Could not find class "%s" in file "%s"', $class, $filePath));
                     }
 
                     // instantiate it
                     $migration = new $class($version, new Input($this->input), new Output($this->output));
 
-                    if (!($migration instanceof AbstractMigration)) {
+                    if (! $migration instanceof AbstractMigration) {
                         throw new \InvalidArgumentException(sprintf('The class "%s" in file "%s" must extend \Phinx\Migration\AbstractMigration', $class, $filePath));
                     }
 

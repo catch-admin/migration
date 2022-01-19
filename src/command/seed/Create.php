@@ -14,6 +14,7 @@ namespace catchAdmin\migration\command\seed;
 use Phinx\Util\Util;
 use think\console\Input;
 use think\console\input\Argument as InputArgument;
+use think\console\input\Option as InputOption;
 use think\console\Output;
 use catchAdmin\migration\command\Seed;
 
@@ -24,9 +25,10 @@ class Create extends Seed
      */
     protected function configure()
     {
-        $this->setName('seed:create')
+        $this->setName('make:seed')
             ->setDescription('Create a new database seeder')
             ->addArgument('name', InputArgument::REQUIRED, 'What is the name of the seeder?')
+            ->addOption('--path', '-p', InputOption::VALUE_REQUIRED, 'create seed in the path which set')
             ->setHelp(sprintf('%sCreates a new database seeder%s', PHP_EOL, PHP_EOL));
     }
 

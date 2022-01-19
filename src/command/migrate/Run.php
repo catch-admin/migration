@@ -28,6 +28,7 @@ class Run extends Migrate
             ->setDescription('Migrate the database')
             ->addOption('--target', '-t', InputOption::VALUE_REQUIRED, 'The version number to migrate to')
             ->addOption('--date', '-d', InputOption::VALUE_REQUIRED, 'The date to migrate to')
+            ->addOption('--path', '-p', InputOption::VALUE_REQUIRED, 'migrate in the path which set')
             ->setHelp(
                 <<<EOT
 The <info>migrate:run</info> command runs all available migrations, optionally up to a specific version
@@ -36,6 +37,7 @@ The <info>migrate:run</info> command runs all available migrations, optionally u
 <info>php think migrate:run -t 20110103081132</info>
 <info>php think migrate:run -d 20110103</info>
 <info>php think migrate:run -v</info>
+<info>php think seed:run -p /path</info>
 
 EOT
             );

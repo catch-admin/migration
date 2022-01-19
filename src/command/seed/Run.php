@@ -27,13 +27,15 @@ class Run extends Seed
         $this->setName('seed:run')
              ->setDescription('Run database seeders')
              ->addOption('--seed', '-s', InputOption::VALUE_REQUIRED, 'What is the name of the seeder?')
-             ->setHelp(
+             ->addOption('--path', '-p', InputOption::VALUE_REQUIRED, 'run seed in the path which set')
+            ->setHelp(
                  <<<EOT
                 The <info>seed:run</info> command runs all available or individual seeders
 
 <info>php think seed:run</info>
 <info>php think seed:run -s UserSeeder</info>
 <info>php think seed:run -v</info>
+<info>php think seed:run -p /path</info>
 
 EOT
              );

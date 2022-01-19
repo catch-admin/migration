@@ -28,7 +28,7 @@ class Create extends Command
      */
     protected function configure()
     {
-        $this->setName('migrate:create')
+        $this->setName('make:migrate')
             ->setDescription('Create a new migration')
             ->addArgument('name', InputArgument::REQUIRED, 'What is the name of the migration?')
             ->addOption('--path', '-p', InputOption::VALUE_REQUIRED, 'create in the path which set')

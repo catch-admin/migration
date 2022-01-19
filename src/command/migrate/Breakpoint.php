@@ -24,7 +24,8 @@ class Breakpoint extends Migrate
              ->setDescription('Manage breakpoints')
              ->addOption('--target', '-t', InputOption::VALUE_REQUIRED, 'The version number to set or clear a breakpoint against')
              ->addOption('--remove-all', '-r', InputOption::VALUE_NONE, 'Remove all breakpoints')
-             ->setHelp(
+            ->addOption('--path', '-p', InputOption::VALUE_REQUIRED, 'breakpoint in the path which set')
+            ->setHelp(
                  <<<EOT
                  The <info>breakpoint</info> command allows you to set or clear a breakpoint against a specific target to inhibit rollbacks beyond a certain target.
 If no target is supplied then the most recent migration will be used.
@@ -33,6 +34,8 @@ You cannot specify un-migrated targets
 <info>php think migrate:breakpoint</info>
 <info>php think migrate:breakpoint -t 20110103081132</info>
 <info>php think migrate:breakpoint -r</info>
+<info>php think seed:run -p /path</info>
+
 EOT
              );
     }
