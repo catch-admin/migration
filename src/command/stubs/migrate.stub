@@ -8,7 +8,7 @@ class Goods extends Migrator
 {
     public function change()
     {
-        Scheme::create('goods_test', function (Table $table) {
+        Scheme::create('table_name', function (Table $table) {
 
         });
     }
