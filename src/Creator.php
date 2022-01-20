@@ -29,12 +29,12 @@ class Creator
     /**
      * @time 2022年01月17日
      * @param string $className
-     * @param string $path
+     * @param  $path
      * @return string
      */
-    public function create(string $className, string $path = ''): string
+    public function create(string $className,  $path = null): string
     {
-        $path = $this->ensureDirectory($path);
+        $path = $this->ensureDirectory($path ? : '');
 
         if (! Util::isValidPhinxClassName($className)) {
             throw new InvalidArgumentException(sprintf('The migration class name "%s" is invalid. Please use CamelCase format.', $className));

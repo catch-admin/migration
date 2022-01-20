@@ -11,7 +11,9 @@
 
 namespace catchAdmin\migration\builder;
 
+use catchAdmin\migration\exceptions\CreateTableException;
 use catchAdmin\migration\exceptions\TableNotExistException;
+use catchAdmin\migration\exceptions\UpdateTableException;
 use catchAdmin\migration\traits\Adapter;
 
 /**
@@ -43,16 +45,25 @@ class Scheme
      * @param string $tableName
      * @param \Closure $create
      * @return bool
+     * @throws CreateTableException
      */
     public function _create(string $tableName, \Closure $create): bool
     {
-        $table = $this->getTable($tableName);
+        try {
+            $table = $this->getTable($tableName);
 
-        $create($table);
+            $create($table);
 
-        $table->create();
+            $table->engine();
 
-        return true;
+            $table->collation();
+
+            $table->create();
+
+            return true;
+        } catch (\Exception $e) {
+            throw new CreateTableException($e->getMessage());
+        }
     }
 
     /**
@@ -62,21 +73,30 @@ class Scheme
      * @param string $tableName
      * @param \Closure $update
      * @return bool
-     * @throws TableNotExistException
+     * @throws \Exception
      */
     public function _table(string $tableName, \Closure $update): bool
     {
-        $table = $this->getTable($tableName);
+        try {
+            $table = $this->getTable($tableName);
 
-        if (! $table->exists()) {
-            throw new TableNotExistException("Table {$tableName} Not Exists In Database");
+            if (!$table->exists()) {
+                throw new TableNotExistException("Table {$tableName} Not Exists In Database");
+            }
+
+            $update($table);
+
+            $changeColumns = $table->getBuildingColumns();
+
+            /* @var Column $column */
+            foreach ($changeColumns as $column) {
+                $table->changeColumn($column->getName(), $column->getType(), $column->getOptions());
+            }
+
+            return true;
+        } catch (\Exception $e) {
+            throw new UpdateTableException($e->getMessage());
         }
-
-        $update($table);
-
-        $table->save();
-
-        return true;
     }
 
     /**

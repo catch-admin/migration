@@ -444,6 +444,7 @@ class Column extends \Phinx\Db\Table\Column
         }
     }
 
+
     /**
      * @time 2022年01月17日
      * @param string $updatedAt
@@ -514,5 +515,25 @@ class Column extends \Phinx\Db\Table\Column
         $this->setAfter($name);
 
         return $this;
+    }
+
+    /**
+     * @desc get options
+     * @time 2022年01月20日
+     * @return array
+     */
+    public function getOptions(): array
+    {
+        $validateOptions = $this->getValidOptions();
+
+        $options = [];
+
+        foreach ($validateOptions as $option) {
+            if (method_exists($this, 'get' . ucfirst($option))) {
+                $options[$option] = $this->{'get' . ucfirst($option)}();
+            }
+        }
+
+        return $options;
     }
 }

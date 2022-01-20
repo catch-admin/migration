@@ -11,7 +11,6 @@
 
 namespace catchAdmin\migration\builder;
 
-use catchAdmin\migration\exceptions\ColumnCreateFailedException;
 use Phinx\Db\Table\Index;
 use Phinx\Db\Table as PhinxTable;
 
@@ -55,21 +54,14 @@ use Phinx\Db\Table as PhinxTable;
 class Table extends PhinxTable
 {
     /**
-     * @var array
-     */
-    protected $options = [];
-
-    /**
      * 设置id
      * @param string $id
-     * @param bool $signed
+     * @param bool $bigInteger
      * @return $this
      */
-    public function id(string $id = 'id', bool $signed = false): Table
+    public function id(string $id = 'id', bool $bigInteger = false): Table
     {
-        $this->options['id'] = $id;
-
-        $this->options['signed'] = $signed;
+        $bigInteger ? $this->bigIncrement($id)->primary($id) : $this->increment($id)->primary($id);
 
         return $this;
     }
@@ -121,7 +113,7 @@ class Table extends PhinxTable
      */
     public function engine(string $engine = 'InnoDB'): Table
     {
-        $this->options['engine'] = $engine;
+        $this->options['engine'] = $this->options['engine'] ?? $engine;
 
         return $this;
     }
@@ -147,7 +139,7 @@ class Table extends PhinxTable
      */
     public function collation(string $collation = 'utf8mb4_general_ci'): Table
     {
-        $this->options['collation'] = $collation;
+        $this->options['collation'] = $this->options['collation'] ?? $collation;
 
         return $this;
     }
@@ -156,31 +148,11 @@ class Table extends PhinxTable
      * @time 2022年01月17日
      * @param $columnType
      * @param $arguments
-     * @return Column
-     * @throws ColumnCreateFailedException
+     * @return Column|mixed
      */
     public function __call($columnType, $arguments): Column
     {
-        $columnName = $arguments[0];
-
-        $column = new Column();
-
-        switch (count($arguments)) {
-            case 1:
-                $column = $column->{$columnType}($columnName);
-                break;
-            case 2:
-                $column = $column->{$columnType}($columnName, $arguments[1]);
-                break;
-            case 3:
-                $column = $column->{$columnType}($columnName, $arguments[1], $arguments[2]);
-                break;
-            case 4:
-                $column = $column->{$columnType}($columnName, $arguments[1], $arguments[2], $arguments[3]);
-                break;
-            default:
-                throw new ColumnCreateFailedException("Column {$columnName} create failed, arguments not support");
-        }
+        $column = call_user_func_array([new Column(), $columnType], $arguments);
 
         $this->addColumn($column);
 
@@ -284,6 +256,17 @@ class Table extends PhinxTable
     }
 
     /**
+     * building columns
+     *
+     * @time 2022年01月17日
+     * @return array
+     */
+    public function getBuildingColumns(): array
+    {
+        return $this->columns;
+    }
+
+    /**
      * created_at & updated_at
      *
      * @time 2022年01月17日
@@ -300,16 +283,5 @@ class Table extends PhinxTable
         $this->addColumn((new Column())->updatedAt($updatedAt, $default, $withTimestamp));
 
         return $this;
-    }
-
-    /**
-     * building columns
-     *
-     * @time 2022年01月17日
-     * @return array
-     */
-    public function getBuildingColumns(): array
-    {
-        return $this->columns;
     }
 }
