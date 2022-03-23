@@ -39,7 +39,7 @@ use Phinx\Db\Table as PhinxTable;
  * @method Column decimal($name, int $precision = 8, int $scale = 2)
  * @method Column dateTime(string $name)
  * @method Column date(string $name)
- * @method Column char(string $name)
+ * @method Column char(string $name, int $length = 255)
  * @method Column boolean(string $name)
  * @method Column binary(string $name)
  * @method Column softDelete(string $deletedAt = 'delete_at', int $default = 0)
@@ -53,6 +53,8 @@ use Phinx\Db\Table as PhinxTable;
  */
 class Table extends PhinxTable
 {
+    protected $foreignColumns = [];
+
     /**
      * 设置id
      * @param string $id
@@ -148,7 +150,7 @@ class Table extends PhinxTable
      * @time 2022年01月17日
      * @param $columnType
      * @param $arguments
-     * @return Column|mixed
+     * @return Column
      */
     public function __call($columnType, $arguments): Column
     {
@@ -283,5 +285,92 @@ class Table extends PhinxTable
         $this->addColumn((new Column())->updatedAt($updatedAt, $default, $withTimestamp));
 
         return $this;
+    }
+
+    /**
+     *
+     * @param string $foreignColumn
+     * @return $this
+     */
+    public function foreign(string $foreignColumn): Table
+    {
+        $this->foreignColumns[] = ['foreign' => $foreignColumn];
+
+        return $this;
+    }
+
+    /**
+     *
+     * @param string $referenceColumn
+     * @return $this
+     */
+    public function references(string $referenceColumn): Table
+    {
+        $latest = array_pop($this->foreignColumns);
+
+        $latest['references'] = $referenceColumn;
+
+        array_push($this->foreignColumns);
+
+        return $this;
+    }
+
+    /**
+     *
+     * @param string $table
+     * @return $this
+     */
+    public function on(string $table): Table
+    {
+        $latest = array_pop($this->foreignColumns);
+
+        $latest['on'] = $table;
+
+        array_push($this->foreignColumns);
+
+        return $this;
+    }
+
+    /**
+     * $option  [‘SET_NULL’, ‘NO_ACTION’, ‘CASCADE’ and ‘RESTRICT’]
+     *
+     * @param string $option
+     * @return $this
+     */
+    public function onDelete(string $option): Table
+    {
+        $latest = array_pop($this->foreignColumns);
+
+        $latest['options'] = ['delete' => $option];
+
+        array_push($this->foreignColumns);
+
+        return $this;
+    }
+
+    /**
+     * $option  [‘SET_NULL’, ‘NO_ACTION’, ‘CASCADE’ and ‘RESTRICT’]
+     *
+     * @param string $option
+     * @return $this
+     */
+    public function onUpdate(string $option): Table
+    {
+        $latest = array_pop($this->foreignColumns);
+
+        $latest['options'] = ['update' => $option];
+
+        array_push($this->foreignColumns);
+
+        return $this;
+    }
+
+    /**
+     *
+     * @return array
+     */
+    public function getForeignColumns(): array
+    {
+        return $this->foreignColumns;
     }
 }

@@ -89,7 +89,7 @@ trait Adapter
     /**
      * get database config
      * @time 2022年01月17日
-     * @return array|mixed
+     * @return array
      */
     protected function getDefaultDatabase(): array
     {
@@ -103,7 +103,7 @@ trait Adapter
      * @time 2022年01月19日
      * @return \think\Config
      */
-    protected function config()
+    protected function config(): \think\Config
     {
         return app()->config;
     }

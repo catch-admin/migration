@@ -21,7 +21,8 @@ use catchAdmin\migration\traits\Adapter;
  * @method static table(string $tableName, \Closure $update)
  * @method static drop(string $tableName)
  * @method static rename(string $from, string $to)
- * @method static dropIfExist(string $from, string $to)
+ * @method static dropIfExist(string $table)
+ * @method static hasTable(string $table)
  */
 class Scheme
 {
@@ -47,12 +48,14 @@ class Scheme
      * @return bool
      * @throws CreateTableException
      */
-    public function _create(string $tableName, \Closure $create): bool
+    protected function _create(string $tableName, \Closure $create): bool
     {
         try {
             $table = $this->getTable($tableName);
 
             $create($table);
+
+            $table = $this->createForeignKeys($table);
 
             $table->engine();
 
@@ -75,7 +78,7 @@ class Scheme
      * @return bool
      * @throws \Exception
      */
-    public function _table(string $tableName, \Closure $update): bool
+    protected function _table(string $tableName, \Closure $update): bool
     {
         try {
             $table = $this->getTable($tableName);
@@ -93,6 +96,9 @@ class Scheme
                 $table->changeColumn($column->getName(), $column->getType(), $column->getOptions());
             }
 
+            $table = $this->createForeignKeys($table);
+
+            $table->save();
             return true;
         } catch (\Exception $e) {
             throw new UpdateTableException($e->getMessage());
@@ -106,7 +112,7 @@ class Scheme
      * @param string $table
      * @return bool
      */
-    public function _drop(string $table): bool
+    protected function _drop(string $table): bool
     {
         $this->getTable($table)->drop();
 
@@ -114,17 +120,42 @@ class Scheme
     }
 
     /**
+     * 创建外键
+     *
+     * @param Table $table
+     * @return Table
+     */
+    protected function createForeignKeys(Table $table): Table
+    {
+        $foreignColumns = $table->getForeignColumns();
+
+        foreach ($foreignColumns as $foreignColumn) {
+            $table->addForeignKey($foreignColumn['foreign'], $foreignColumn['on'], $foreignColumn['references'], $foreignColumn['options']);
+        }
+
+        return $table;
+    }
+    /**
      * @time 2022年01月19日
      * @param string $table
      * @return bool
      */
-    public function _dropIfExist(string $table): bool
+    protected function _dropIfExist(string $table): bool
     {
         if ($this->getTable($table)->exists()) {
             $this->getTable($table)->drop();
         }
 
         return true;
+    }
+
+    /**
+     * @param string $table
+     * @return bool
+     */
+    protected function _hasTable(string $table): bool
+    {
+        return $this->getTable($table)->exists();
     }
 
     /**
@@ -135,7 +166,7 @@ class Scheme
      * @return bool
      * @throws TableNotExistException
      */
-    public function _rename(string $from, string $to): bool
+    protected function _rename(string $from, string $to): bool
     {
         $table = $this->getTable($from);
 
